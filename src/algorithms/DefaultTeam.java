@@ -2,33 +2,35 @@ package algorithms;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class DefaultTeam {
-  public ArrayList<Point> calculAngularTSP(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> hitPoints) {
-    int[][] paths=new int[points.size()][points.size()];
-    double[][] dist=new double[points.size()][points.size()];
-    
-    
-    floydWarshall(points, edgeThreshold, paths, dist);
-    ArrayList<Point> result = calculATSP(points, edgeThreshold, hitPoints, paths, dist);
-    System.out.println("SCORE NORMAL: "+score(result));
-    ArrayList<Point> tmp;
-    for(int i = 0; i < 0; i++) {
-    	tmp = calculATSP(points, edgeThreshold, hitPoints, paths, dist);
-    	if(score(tmp) < score(result)) {
-    		result = tmp;
-    	}
-    }
-    
-    //return result;
-    
-    
-    while (score(result)>score(bruteforceWindow(result, edgeThreshold, dist))) result=bruteforceWindow(result, edgeThreshold, dist);
-    
-    
-    System.out.println("SCORE BRUTEFORCE: "+score(result));
-    return result;
+
+	
+	public ArrayList<Point> calculAngularTSP(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> hitPoints) {
+	    int[][] paths=new int[points.size()][points.size()];
+	    double[][] dist=new double[points.size()][points.size()];
+	    
+	    floydWarshall(points, edgeThreshold, paths, dist);
+	    ArrayList<Point> result = calculATSP(points, edgeThreshold, hitPoints, paths, dist);
+	    
+	    
+	    
+	    ArrayList<Point> tmp;
+	    for(int i = 0; i < 50; i++) {
+	    	tmp = calculATSP(points, edgeThreshold, hitPoints, paths, dist);
+	    	if(Evaluator.score(tmp) < Evaluator.score(result)) {
+	    		result = tmp;
+	    	}
+	    }
+	    
+	    //return result;
+	    
+	    System.out.println("SCORE NORMAL: "+Evaluator.score(result));
+	    while (Evaluator.score(result)>Evaluator.score(bruteforceWindow(result, edgeThreshold, dist))) result=bruteforceWindow(result, edgeThreshold, dist);
+	    System.out.println("SCORE BRUTEFORCE: "+Evaluator.score(result));
+	    while (Evaluator.score(result)>Evaluator.score(localSearchCross(result, edgeThreshold, paths, dist, points))) result=localSearchCross(result, edgeThreshold, paths, dist, points);
+	    System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(result));
+	    return result;
   }
   
   public static ArrayList<ArrayList<Point>> permutation(ArrayList<Point> topermut){
@@ -115,8 +117,7 @@ public class DefaultTeam {
 		  }else if(value > 1) {
 			  value = 1;
 		  }
-		  s += (100./Math.PI)*Math.acos(value);
-		  
+		  s += Evaluator.angle(p, q, r);
 	  }
 	  return s;
   }
@@ -146,31 +147,28 @@ public class DefaultTeam {
     	  validpermutation(permut, p1, p2, edgeThreshold, dist);
     	  sol = minimumcost(permut);
 
-    	  
     	  if(sol != null) {
     		  res = new ArrayList<>();
     		  res.addAll(sol);
     		  for(int k = 0; k < points.size()-6; k++) {
     			  res.add(points.get((i+5+k)%points.size()));
     		  }
-    		  
     		  return res;
     	  }
-
-          
       }
       return points;
   }
   
   public ArrayList<Point> calculATSP(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> hitPoints, int[][] paths, double[][] dist){
 	   ArrayList<Point> result = new ArrayList<Point>();
+	   ArrayList<Point> dup = new ArrayList<>(hitPoints);
 	    
-	    ArrayList<Point> dup = new ArrayList<>(hitPoints);
-	    //Collections.shuffle(dup);
+	    
+	    
 	    Point m, n = null;
-	    m = dup.remove(0);
-	 
-	    
+	    int select = (int)(Math.random()*dup.size());
+	    select = 0;
+	    m = dup.remove(select);
 	    while(dup.size() > 0) {
 	    	n = dup.get(0);
 	    	for(int j = 1; j < dup.size(); j++) {
@@ -178,18 +176,11 @@ public class DefaultTeam {
 	    			n = dup.get(j);
 	    		}
 	    	}
-	    	
-	    	
 	    	result.addAll(expandPaths(points, m, n, paths, dist));
-	    	
 	    	m=dup.remove(dup.indexOf(n));
-	    
 	    }
-	    
 	    result.addAll(expandPaths(points, n, result.get(0), paths, dist));
 	    
-	    
-	    while (score(result)>score(localSearchCross(result, edgeThreshold, paths, dist, points))) result=localSearchCross(result, edgeThreshold, paths, dist, points);
 	    return result;
   }
   
@@ -240,6 +231,73 @@ public class DefaultTeam {
 	  return res;
   }
   
+
+  
+
+  
+  private ArrayList<Point> localSearchCross(ArrayList<Point> points, int edgeThreshold, int[][] paths, double[][] dist, ArrayList<Point> original){
+      for (int i=0;i<points.size();i++){
+          for (int j=i+2;j<points.size() ;j++){
+        	  double a=dist[i][(i+1)%points.size()];
+              double b=dist[j%points.size()][(j+1)%points.size()];
+              double c=dist[i][j%points.size()];
+              double d=dist[(i+1)%points.size()][(j+1)%points.size()];
+              
+              double a1;
+              double a2;
+              
+              a1 = Evaluator.angle(points.get((i-1+points.size())%points.size()), points.get((i)%points.size()), points.get((i+1)%points.size())) +
+            		  Evaluator.angle(points.get((i)%points.size()), points.get((i+1)%points.size()), points.get((i+2)%points.size())) +
+            		  Evaluator.angle(points.get((j-1+points.size())%points.size()), points.get((j)%points.size()), points.get((j+1)%points.size())) +
+            		  Evaluator.angle(points.get((j)%points.size()), points.get((j+1)%points.size()), points.get((j+2)%points.size()));
+              
+              a2 = Evaluator.angle(points.get((i-1+points.size())%points.size()), points.get((i)%points.size()), points.get((j)%points.size())) +
+            		  Evaluator.angle(points.get((i)%points.size()), points.get((j)%points.size()), points.get((j-1+points.size())%points.size())) +
+            		  Evaluator.angle(points.get((i+1+points.size())%points.size()), points.get((j+1)%points.size()), points.get((j+2)%points.size())) +
+            		  Evaluator.angle(points.get((j+1)%points.size()), points.get((i+1)%points.size()), points.get((i+2)%points.size()));
+              
+              
+              if (a+b+a1>c+d+a2) {
+            	  if(c < edgeThreshold && d < edgeThreshold) {
+            		  ArrayList<Point> p=new ArrayList<Point>();
+                      for (int k=0;k<=i;k++) p.add(points.get(k));
+                      for (int k=j;k>i;k--) p.add(points.get(k));
+                      for (int k=j+1;k<points.size();k++) p.add(points.get(k));
+                      return p;
+            	  }else {
+            		  ArrayList<Point> p=new ArrayList<Point>();
+            		  for (int k=0;k<=i;k++) p.add(points.get(k));
+            		  if(points.get(i).distance(points.get(j)) > edgeThreshold) {
+            			  ArrayList<Point> pts = expandPaths(original, points.get(i), points.get(j), paths, dist);
+            			  pts.remove(0);
+            			  p.addAll(pts);
+            		  }
+            		  
+            		  for (int k=j;k>i;k--) p.add(points.get(k));
+            		  
+            		  if(points.get((i+1)%points.size()).distance(points.get((j+1)%points.size())) > edgeThreshold) {
+            			  ArrayList<Point> pts = expandPaths(original, points.get((i+1)%points.size()), points.get((j+1)%points.size()), paths, dist);
+            			  pts.remove(0);
+            			  //Collections.reverse(pts);
+            			  p.addAll(pts);
+            		  }
+            		  for (int k=j+1;k<points.size();k++) p.add(points.get(k));
+                      return p;
+            	  }
+              }
+          }
+      }
+      return points;
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  /*
   private double score(ArrayList<Point> points){
       return scoreDistance(points)+scoreAngle(points);
   }
@@ -273,84 +331,7 @@ public class DefaultTeam {
 		  
 	  }
 	  return s;
-  }
-  
-  private ArrayList<Point> localSearchCross(ArrayList<Point> points, int edgeThreshold, int[][] paths, double[][] dist, ArrayList<Point> original){
-      for (int i=0;i<points.size();i++){
-          for (int j=i+2;j<points.size() ;j++){
-              /*double a=points.get(i).distance(points.get((i+1)%points.size()));
-              double b=points.get(j%points.size()).distance(points.get((j+1)%points.size()));
-              double c=points.get(i).distance(points.get(j%points.size()));
-              double d=points.get((i+1)%points.size()).distance(points.get((j+1)%points.size()));
-              if (a+b>c+d) {
-            	  if(points.get(i).distance(points.get(j)) < edgeThreshold && points.get((i+1)%points.size()).distance(points.get((j+1)%points.size())) < edgeThreshold) {
-            		  ArrayList<Point> p=new ArrayList<Point>();
-                      for (int k=0;k<=i;k++) p.add(points.get(k));
-                      for (int k=j;k>i;k--) p.add(points.get(k));
-                      for (int k=j+1;k<points.size();k++) p.add(points.get(k));
-                      return p;
-            	  }else {
-            		  ArrayList<Point> p=new ArrayList<Point>();
-            		  for (int k=0;k<=i;k++) p.add(points.get(k));
-            		  if(points.get(i).distance(points.get(j)) > edgeThreshold) {
-            			  System.out.println("LA");
-            			  ArrayList<Point> pts = expandPaths(points, points.get(i), points.get(j), paths, dist);
-            			  pts.remove(0);
-            			  p.addAll(pts);
-            		  }
-            		  
-            		  for (int k=j;k>i;k--) p.add(points.get(k));
-            		  
-            		  if(points.get((i+1)%points.size()).distance(points.get((j+1)%points.size())) > edgeThreshold) {
-            			  System.out.println("LA2");
-            			  ArrayList<Point> pts = expandPaths(points, points.get((i+1)%points.size()), points.get((j+1)%points.size()), paths, dist);
-            			  pts.remove(0);
-            			  //Collections.reverse(pts);
-            			  p.addAll(pts);
-            		  }
-            		  for (int k=j+1;k<points.size();k++) p.add(points.get(k));
-                      return p;
-            	  }
-                  
-              }*/
-        	  
-        	  double a=dist[i][(i+1)%points.size()];
-              double b=dist[j%points.size()][(j+1)%points.size()];
-              double c=dist[i][j%points.size()];
-              double d=dist[(i+1)%points.size()][(j+1)%points.size()];
-              if (a+b>c+d) {
-            	  if(c < edgeThreshold && d < edgeThreshold) {
-            		  ArrayList<Point> p=new ArrayList<Point>();
-                      for (int k=0;k<=i;k++) p.add(points.get(k));
-                      for (int k=j;k>i;k--) p.add(points.get(k));
-                      for (int k=j+1;k<points.size();k++) p.add(points.get(k));
-                      return p;
-            	  }else {
-            		  ArrayList<Point> p=new ArrayList<Point>();
-            		  for (int k=0;k<=i;k++) p.add(points.get(k));
-            		  if(points.get(i).distance(points.get(j)) > edgeThreshold) {
-            			  ArrayList<Point> pts = expandPaths(original, points.get(i), points.get(j), paths, dist);
-            			  pts.remove(0);
-            			  p.addAll(pts);
-            		  }
-            		  
-            		  for (int k=j;k>i;k--) p.add(points.get(k));
-            		  
-            		  if(points.get((i+1)%points.size()).distance(points.get((j+1)%points.size())) > edgeThreshold) {
-            			  ArrayList<Point> pts = expandPaths(original, points.get((i+1)%points.size()), points.get((j+1)%points.size()), paths, dist);
-            			  pts.remove(0);
-            			  //Collections.reverse(pts);
-            			  p.addAll(pts);
-            		  }
-            		  for (int k=j+1;k<points.size();k++) p.add(points.get(k));
-                      return p;
-            	  }
-              }
-          }
-      }
-      return points;
-  }
-  
+  }*/
 }
 
 class FloatPoint{
