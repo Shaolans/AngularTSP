@@ -30,6 +30,7 @@ public class DefaultTeam {
 	    System.out.println("SCORE BRUTEFORCE: "+Evaluator.score(result));
 	    while (Evaluator.score(result)>Evaluator.score(localSearchCross(result, edgeThreshold, paths, dist, points))) result=localSearchCross(result, edgeThreshold, paths, dist, points);
 	    System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(result));
+	    result = calculATSPrototype(points, edgeThreshold, hitPoints, paths, dist);
 	    return result;
   }
   
@@ -184,7 +185,74 @@ public class DefaultTeam {
 	    return result;
   }
   
+  public ArrayList<Point> calculATSPrototype(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> hitPoints, int[][] paths, double[][] dist){
+	  ArrayList<Point> result = new ArrayList<Point>();
+	  ArrayList<Point> dup = new ArrayList<>(hitPoints);
+
+	    Point m, n = null;
+	    int select = (int)(Math.random()*dup.size());
+	    select = 0;
+	    m = dup.remove(select);
+	    result.add(m);
+	    while(dup.size() > 0) {
+	    	n = dup.get(0);
+	    	for(int j = 1; j < dup.size(); j++) {
+	    		if(m.distance(n) > m.distance(dup.get(j))) {
+	    			n = dup.get(j);
+	    		}
+	    	}
+	    	result.add(n);
+	    	m=dup.remove(dup.indexOf(n));
+	    }
+	    
+	    
+   
+   
+     while (score(result)>score(improve(result))) result=improve(result);
+     
+     ArrayList<Point> results = new ArrayList<>();
+     
+     for(int i = 0; i < result.size()-1; i++) {
+    	 results.addAll(expandPaths(points, result.get(i), result.get(i+1), paths, dist));
+     }
+     results.addAll(expandPaths(points, result.get(result.size()-1), result.get(0), paths, dist));
+     
+     
+     
+     
+     System.out.println("SCORE NORMAL: "+Evaluator.score(results));
+    while (Evaluator.score(result)>Evaluator.score(bruteforceWindow(results, edgeThreshold, dist))) result=bruteforceWindow(results, edgeThreshold, dist);
+    System.out.println("SCORE BRUTEFORCE: "+Evaluator.score(results));
+    while (Evaluator.score(result)>Evaluator.score(localSearchCross(results, edgeThreshold, paths, dist, points))) result=localSearchCross(results, edgeThreshold, paths, dist, points);
+    System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(results));
+     return results;
+  }
   
+  
+  private ArrayList<Point> improve(ArrayList<Point> points){
+      for (int i=0;i<points.size();i++){
+          for (int j=i+2;j<points.size() ;j++){
+              double a=points.get(i).distance(points.get((i+1)%points.size()));
+              double b=points.get(j%points.size()).distance(points.get((j+1)%points.size()));
+              double c=points.get(i).distance(points.get(j%points.size()));
+              double d=points.get((i+1)%points.size()).distance(points.get((j+1)%points.size()));
+              if (a+b>c+d) {
+                  ArrayList<Point> p=new ArrayList<Point>();
+                  for (int k=0;k<=i;k++) p.add(points.get(k));
+                  for (int k=j;k>i;k--) p.add(points.get(k));
+                  for (int k=j+1;k<points.size();k++) p.add(points.get(k));
+                  return p;
+              }
+          }
+      }
+      return points;
+  }
+  
+  private double score(ArrayList<Point> points){
+      double s=0;
+      for (int i=0;i<points.size();i++) s+=points.get(i).distance(points.get((i+1)%points.size()));
+      return s;
+  }
   
   
   public void floydWarshall(ArrayList<Point> points, int edgeThreshold, int[][] paths, double[][] dist) {
