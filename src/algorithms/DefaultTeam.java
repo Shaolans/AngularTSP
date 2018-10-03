@@ -11,7 +11,7 @@ public class DefaultTeam {
 	    double[][] dist=new double[points.size()][points.size()];
 	    
 	    floydWarshall(points, edgeThreshold, paths, dist);
-	    ArrayList<Point> result = calculATSP(points, edgeThreshold, hitPoints, paths, dist);
+	    /*ArrayList<Point> result = calculATSP(points, edgeThreshold, hitPoints, paths, dist);
 	    
 	    
 	    
@@ -29,8 +29,8 @@ public class DefaultTeam {
 	    while (Evaluator.score(result)>Evaluator.score(bruteforceWindow(result, edgeThreshold, dist))) result=bruteforceWindow(result, edgeThreshold, dist);
 	    System.out.println("SCORE BRUTEFORCE: "+Evaluator.score(result));
 	    while (Evaluator.score(result)>Evaluator.score(localSearchCross(result, edgeThreshold, paths, dist, points))) result=localSearchCross(result, edgeThreshold, paths, dist, points);
-	    System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(result));
-	    result = calculATSPrototype(points, edgeThreshold, hitPoints, paths, dist);
+	    System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(result));*/
+	    ArrayList<Point> result = calculATSPrototype(points, edgeThreshold, hitPoints, paths, dist);
 	    return result;
   }
   
@@ -220,11 +220,11 @@ public class DefaultTeam {
      
      
      
-     System.out.println("SCORE NORMAL: "+Evaluator.score(results));
+     /*System.out.println("SCORE NORMAL: "+Evaluator.score(results));
     while (Evaluator.score(result)>Evaluator.score(bruteforceWindow(results, edgeThreshold, dist))) result=bruteforceWindow(results, edgeThreshold, dist);
     System.out.println("SCORE BRUTEFORCE: "+Evaluator.score(results));
     while (Evaluator.score(result)>Evaluator.score(localSearchCross(results, edgeThreshold, paths, dist, points))) result=localSearchCross(results, edgeThreshold, paths, dist, points);
-    System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(results));
+    System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(results));*/
      return results;
   }
   
