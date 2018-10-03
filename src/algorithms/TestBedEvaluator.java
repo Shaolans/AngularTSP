@@ -74,7 +74,7 @@ public class TestBedEvaluator {
     return fails;
   }
   protected static void evalFiles(boolean proxyPPTI) {
-	httpsconnect();
+	//httpsconnect();
     result = 0;
     fails=0;
     for (int index=0;index<200;index++){
@@ -131,25 +131,26 @@ public class TestBedEvaluator {
     return;
   }
   
+  
   public static void httpsconnect() {
-	  TrustManager[] trustAllCerts = new TrustManager[] {
-		  new X509TrustManager() {     
-		        public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-		            return new X509Certificate[0];
-		        } 
-		        public void checkClientTrusted( 
-		            java.security.cert.X509Certificate[] certs, String authType) {
-		            } 
-		        public void checkServerTrusted( 
-		            java.security.cert.X509Certificate[] certs, String authType) {
-		        }
-		    } 
-	  };
-	  
-	  try {
-		  SSLContext sc = SSLContext.getInstance("SSL"); 
-		  sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
-		  HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		  } catch (GeneralSecurityException e) {} 
+      TrustManager[] trustAllCerts = new TrustManager[] {
+          new X509TrustManager() {     
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
+                    return new X509Certificate[0];
+                } 
+                public void checkClientTrusted( 
+                    java.security.cert.X509Certificate[] certs, String authType) {
+                    } 
+                public void checkServerTrusted( 
+                    java.security.cert.X509Certificate[] certs, String authType) {
+                }
+            } 
+      };
+      
+      try {
+          SSLContext sc = SSLContext.getInstance("SSL"); 
+          sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
+          HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+          } catch (GeneralSecurityException e) {} 
   }
 }
