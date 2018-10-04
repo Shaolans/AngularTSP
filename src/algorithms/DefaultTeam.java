@@ -176,17 +176,37 @@ public class DefaultTeam {
 	    //select = 0;
 	    m = dup.remove(select);
 	    result.add(m);
+	    Point previous = m;
+	    double angle=0;
 	    while(dup.size() > 0) {
 	    	n = dup.get(0);
 	    	for(int j = 1; j < dup.size(); j++) {
-	    		if(m.distance(n) > m.distance(dup.get(j))) {
-	    			n = dup.get(j);
+	    		
+	    		if(m.distance(n) >= m.distance(dup.get(j))) {
+	    			
+	    			if(m.distance(n) < 32+m.distance(dup.get(j))) {
+	    				
+	    				if(m.distance(n)+angle > m.distance(dup.get(j)) +Evaluator.angle( dup.get(j),  m,previous)) {
+	    					angle = Evaluator.angle( dup.get(j),  m,previous);
+	    	    			n = dup.get(j);
+	    	    			
+	    				}
+	    				
+	    			}
+	    			else
+	    				n = dup.get(j);
+	    			
 	    		}
 	    	}
+	    	previous = m;
 	    	result.add(n);
 	    	m=dup.remove(dup.indexOf(n));
 	    }
 	    
+	    
+	    ArrayList<Point> tmp = new ArrayList<>(result);
+	    
+
 	    
    
    

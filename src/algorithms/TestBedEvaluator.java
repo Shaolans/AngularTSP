@@ -27,7 +27,7 @@ import algorithms.DefaultTeam;
 public class TestBedEvaluator {
   private static String testFolder="aaga2016/angularTSPDG/tests";
   private static int edgeThreshold=55;
-  private static boolean proxyPPTI = false;
+  private static boolean proxyPPTI = true;
   public static void main(String[] args) {
     for (int i=0;i<args.length;i++){
       if (args[i].charAt(0)=='-'){
