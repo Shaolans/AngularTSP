@@ -293,7 +293,7 @@ private double angleSum(ArrayList<Point> points, Point p, Point q, int[][] paths
 		  
 		  	previous = p;
 	    	p=points.get(i);       
-	    	if(i+1==points.size()) break;
+	    	if(paths[i][j]>=points.size()) break;
 	    	sum += Evaluator.angle( previous, p, points.get(paths[i][j]));
 
 	        i=paths[i][j];
