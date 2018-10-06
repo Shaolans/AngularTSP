@@ -170,46 +170,41 @@ public class DefaultTeam {
   public ArrayList<Point> calculATSP(ArrayList<Point> points, int edgeThreshold, ArrayList<Point> hitPoints, int[][] paths, double[][] dist, int select){
 	  ArrayList<Point> result = new ArrayList<Point>();
 	  ArrayList<Point> dup = new ArrayList<>(hitPoints);
+	  
+	  
+	  	double [][] angles = new double[hitPoints.size()][hitPoints.size()];
+	  	double [][] distances = new double[hitPoints.size()][hitPoints.size()];
+	  	
+	  	//computeAngles(points, hitPoints, angles, paths);
+	  	computeDistances(points, hitPoints, distances, dist, paths);
 
 	    Point m, n = null;
 	    //int select = (int)(Math.random()*dup.size());
 	    //select = 0;
 	    m = dup.remove(select);
 	    result.add(m);
-	    Point previous = m;
-	    double angle=0;
 	    while(dup.size() > 0) {
 	    	n = dup.get(0);
+
+
 	    	for(int j = 1; j < dup.size(); j++) {
-	    		
-	    		if(m.distance(n) >= m.distance(dup.get(j))) {
-	    			
-	    			if(m.distance(n) < 32+m.distance(dup.get(j))) {
-	    				
-	    				if(m.distance(n)+angle > m.distance(dup.get(j)) +Evaluator.angle( dup.get(j),  m,previous)) {
-	    					angle = Evaluator.angle( dup.get(j),  m,previous);
+
+
+	    				if(distances[hitPoints.indexOf(m)][hitPoints.indexOf(n)] > distances[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))] + angles[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))]) {
+	    					
 	    	    			n = dup.get(j);
-	    	    			
+
 	    				}
-	    				
-	    			}
-	    			else
-	    				n = dup.get(j);
+
 	    			
-	    		}
+	    		
 	    	}
-	    	previous = m;
+
 	    	result.add(n);
 	    	m=dup.remove(dup.indexOf(n));
 	    }
 	    
-	    
-	    ArrayList<Point> tmp = new ArrayList<>(result);
-	    
 
-	    
-   
-   
      while (score(result)>score(improve(result))) result=improve(result);
      
      ArrayList<Point> results = new ArrayList<>();
@@ -228,6 +223,84 @@ public class DefaultTeam {
     while (Evaluator.score(result)>Evaluator.score(localSearchCross(results, edgeThreshold, paths, dist, points))) result=localSearchCross(results, edgeThreshold, paths, dist, points);
     System.out.println("SCORE LOCAL CROSS: "+Evaluator.score(results));*/
      return results;
+  }
+  
+  private void computeDistances(ArrayList<Point> points, ArrayList<Point> hitPoints, double[][] distances,
+		double[][] dist, int[][] paths) {
+		Point p,q;
+	  for(int i=0 ; i<distances.length; i++) {
+		  
+			 p = hitPoints.get(i);
+			  
+			  for(int j=0; j<distances.length; j++) {
+				  q = hitPoints.get(j);
+				  distances[i][j] = distSum(points, p, q, dist, paths);
+			  }
+			  
+		  }
+	
+}
+
+private double distSum(ArrayList<Point> points, Point p, Point q, double[][] dist, int[][] paths) {
+  double sum=0;
+	  
+	  int i = points.indexOf(p);
+	  int j = points.indexOf(q);
+
+	  while(i!=j) {
+		  
+		  	
+	    	p=points.get(i);       
+	    	
+	    	sum += dist[i][j];
+
+	        i=paths[i][j];
+	        
+	 }
+	  
+	  return sum;
+
+}
+
+private void computeAngles(ArrayList<Point> points, ArrayList<Point> hitPoints, double[][] angles, int[][] paths) {
+	
+	  	Point p,q;
+	  
+	  for(int i=0 ; i<angles.length; i++) {
+		  
+		 p = hitPoints.get(i);
+		  
+		  for(int j=0; j<angles.length; j++) {
+			  q = hitPoints.get(j);
+			  angles[i][j] = angleSum(points, p, q, paths);
+		  }
+		  
+	  }
+	
+}
+
+private double angleSum(ArrayList<Point> points, Point p, Point q, int[][] paths) {
+	  
+	  double sum=0;
+	  
+	  int i = points.indexOf(p);
+	  int j = points.indexOf(q);
+	  Point previous;
+	  
+	  previous = points.get(0);
+
+	  while(i!=j) {
+		  
+		  	previous = p;
+	    	p=points.get(i);       
+	    	if(i+1==points.size()) break;
+	    	sum += Evaluator.angle( previous, p, points.get(paths[i+1][j]));
+
+	        i=paths[i][j];
+	        
+	 }
+	  
+	  return sum;
   }
   
   
