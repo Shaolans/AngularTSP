@@ -13,19 +13,22 @@ public class DefaultTeam {
 	    floydWarshall(points, edgeThreshold, paths, dist);
 	    ArrayList<Point> result = calculATSP(points, edgeThreshold, hitPoints, paths, dist, 0);
 	    ArrayList<Point> tmp;
-	    for(int i = 0; i < hitPoints.size(); i++) {
-	    	tmp = calculATSP(points, edgeThreshold, hitPoints, paths, dist, i);
-	    	if(Evaluator.score(tmp) < Evaluator.score(result)) {
-	    		result = tmp;
-	    	}
+	    for(int k = 0; k < 150; k++) {
+	    	for(int i = 0; i < hitPoints.size(); i++) {
+		    	tmp = calculATSP(points, edgeThreshold, hitPoints, paths, dist, i);
+		    	if(Evaluator.score(tmp) < Evaluator.score(result)) {
+		    		result = tmp;
+		    	}
+		    }
 	    }
 	    
-	    for(int i = 0; i < hitPoints.size(); i++) {
+	    
+	    /*for(int i = 0; i < hitPoints.size(); i++) {
 	    	tmp = calculATSP(points, edgeThreshold, result, paths, dist, i);
 	    	if(Evaluator.score(tmp) < Evaluator.score(result)) {
 	    		result = tmp;
 	    	}
-	    }
+	    }*/
 	    while (Evaluator.score(result)>Evaluator.score(localSearchCross(result, edgeThreshold))) result=localSearchCross(result, edgeThreshold);
 	    while (Evaluator.score(result)>Evaluator.score(bruteforceWindow(result, edgeThreshold, dist))) result=bruteforceWindow(result, edgeThreshold, dist);
 	    while (Evaluator.score(result)>Evaluator.score(localSearchCross(result, edgeThreshold))) result=localSearchCross(result, edgeThreshold);
@@ -158,8 +161,8 @@ public class DefaultTeam {
 	  	double [][] angles = new double[hitPoints.size()][hitPoints.size()];
 	  	double [][] distances = new double[hitPoints.size()][hitPoints.size()];
 	  	
-	  	computeAngles(points, hitPoints, angles, paths);
-	  	computeDistances(points, hitPoints, distances, dist, paths);
+	  	//computeAngles(points, hitPoints, angles, paths);
+	  	//computeDistances(points, hitPoints, distances, dist, paths);
 
 	    Point m, n = null;
 	    //int select = (int)(Math.random()*dup.size());
@@ -167,15 +170,7 @@ public class DefaultTeam {
 	    m = dup.remove(select);
 	    result.add(m);
 	    while(dup.size() > 0) {
-	    	n = dup.get(0);
-	    	for(int j = 1; j < dup.size(); j++) {
-	    				if(distances[hitPoints.indexOf(m)][hitPoints.indexOf(n)] + 
-	    						angles[hitPoints.indexOf(m)][hitPoints.indexOf(n)] > 
-	    				distances[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))] + 
-	    				angles[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))]) {
-	    	    			n = dup.get(j);
-	    				}
-	    	}
+	    	n = dup.get(select(dup, m));
 	    	result.add(n);
 	    	m=dup.remove(dup.indexOf(n));
 	    }
@@ -191,6 +186,29 @@ public class DefaultTeam {
      results.addAll(expandPaths(points, result.get(result.size()-1), result.get(0), paths, dist));
 
      return results;
+  }
+  
+  public int select(ArrayList<Point> points, Point p) {
+	  int best = 0;
+	  for(int i = 1; i < points.size(); i++) {
+		  if(points.get(i).distance(p) < points.get(best).distance(p)) {
+			  best = i;
+		  }
+	  }
+	  int best2 = 0;
+	  if(Math.random() < 0.9) {
+		  for(int i = 1; i < points.size(); i++) {
+			  if(i == best) continue;
+			  if(points.get(i).distance(p) < points.get(best2).distance(p)) {
+				  best2 = i;
+			  }
+		  }
+		  return best2;
+	  }
+	  
+	  
+	  return best;
+	  
   }
   
   private void computeDistances(ArrayList<Point> points, ArrayList<Point> hitPoints, double[][] distances,
