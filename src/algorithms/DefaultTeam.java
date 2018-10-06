@@ -175,7 +175,7 @@ public class DefaultTeam {
 	  	double [][] angles = new double[hitPoints.size()][hitPoints.size()];
 	  	double [][] distances = new double[hitPoints.size()][hitPoints.size()];
 	  	
-	  	//computeAngles(points, hitPoints, angles, paths);
+	  	computeAngles(points, hitPoints, angles, paths);
 	  	computeDistances(points, hitPoints, distances, dist, paths);
 
 	    Point m, n = null;
@@ -190,10 +190,10 @@ public class DefaultTeam {
 	    	for(int j = 1; j < dup.size(); j++) {
 
 
-	    				if(distances[hitPoints.indexOf(m)][hitPoints.indexOf(n)] > distances[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))] + angles[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))]) {
+	    				if(distances[hitPoints.indexOf(m)][hitPoints.indexOf(n)] + angles[hitPoints.indexOf(m)][hitPoints.indexOf(n)] > distances[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))] + angles[hitPoints.indexOf(m)][hitPoints.indexOf(dup.get(j))]) {
 	    					
 	    	    			n = dup.get(j);
-
+	    	    			
 	    				}
 
 	    			
@@ -294,7 +294,7 @@ private double angleSum(ArrayList<Point> points, Point p, Point q, int[][] paths
 		  	previous = p;
 	    	p=points.get(i);       
 	    	if(i+1==points.size()) break;
-	    	sum += Evaluator.angle( previous, p, points.get(paths[i+1][j]));
+	    	sum += Evaluator.angle( previous, p, points.get(paths[i][j]));
 
 	        i=paths[i][j];
 	        
